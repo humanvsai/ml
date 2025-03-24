@@ -1,0 +1,123 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, GradientBoostingClassifier
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Ask for input in exam
+filename = input("Enter dataset file name (with .csv extension): ")
+target_col = input("Enter the target column name: ")
+
+# Load Dataset
+data = pd.read_csv(filename)
+print("First 5 rows of dataset:\\n", data.head())
+
+# Optional encoding if categorical columns present (uncomment if needed)
+# for col in data.columns:
+#     if data[col].dtype == 'object':
+#         data[col] = LabelEncoder().fit_transform(data[col])
+
+# Separate Features & Target
+X = data.drop(target_col, axis=1)
+y = data[target_col]
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scaling
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# LINEAR REGRESSION (only if target is continuous)
+if pd.api.types.is_numeric_dtype(y):
+    lr = LinearRegression()
+    lr.fit(X_train_scaled, y_train)
+    pred_lr = lr.predict(X_test_scaled)
+    print("\\nLinear Regression completed.")
+
+    # Plot Actual vs Predicted for Linear Regression
+    plt.scatter(y_test, pred_lr, color='blue')
+    plt.xlabel("Actual Values")
+    plt.ylabel("Predicted Values")
+    plt.title("Linear Regression: Actual vs Predicted")
+    plt.show()
+else:
+    print("\\nLinear Regression skipped (target is not continuous).")
+
+# LOGISTIC REGRESSION (for classification target)
+logr = LogisticRegression(max_iter=200)
+logr.fit(X_train_scaled, y_train)
+pred_logr = logr.predict(X_test_scaled)
+
+# DECISION TREE
+dt = DecisionTreeClassifier()
+dt.fit(X_train, y_train)
+pred_dt = dt.predict(X_test)
+
+# RANDOM FOREST
+rf = RandomForestClassifier(n_estimators=50)
+rf.fit(X_train, y_train)
+pred_rf = rf.predict(X_test)
+
+# SVM
+svm = SVC(kernel='linear')
+svm.fit(X_train_scaled, y_train)
+pred_svm = svm.predict(X_test_scaled)
+
+# BAGGING
+bagging = BaggingClassifier(estimator=DecisionTreeClassifier(), n_estimators=50, random_state=42)
+bagging.fit(X_train, y_train)
+pred_bagging = bagging.predict(X_test)
+
+# BOOSTING (Gradient Boosting)
+boost = GradientBoostingClassifier(n_estimators=50, random_state=42)
+boost.fit(X_train, y_train)
+pred_boost = boost.predict(X_test)
+
+# KNN
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train_scaled, y_train)
+pred_knn = knn.predict(X_test_scaled)
+
+# Function to evaluate
+def evaluate(model_name, y_true, y_pred):
+    print(f"\\n----- {model_name} -----")
+    print("Accuracy:", accuracy_score(y_true, y_pred))
+    print("Confusion Matrix:\\n", confusion_matrix(y_true, y_pred))
+    print("Classification Report:\\n", classification_report(y_true, y_pred))
+
+# Function to plot confusion matrix
+def plot_confusion(y_true, y_pred, model_name):
+    cm = confusion_matrix(y_true, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt="d", cmap='Blues')
+    plt.title(f"{model_name} Confusion Matrix")
+    plt.ylabel("Actual")
+    plt.xlabel("Predicted")
+    plt.show()
+
+# Evaluate models and plot confusion matrix for classification models
+evaluate("Logistic Regression", y_test, pred_logr)
+plot_confusion(y_test, pred_logr, "Logistic Regression")
+
+evaluate("Decision Tree", y_test, pred_dt)
+
+evaluate("Random Forest", y_test, pred_rf)
+
+evaluate("SVM", y_test, pred_svm)
+plot_confusion(y_test, pred_svm, "SVM")
+
+evaluate("Bagging Classifier", y_test, pred_bagging)
+
+evaluate("Gradient Boosting", y_test, pred_boost)
+
+evaluate("K-Nearest Neighbors (KNN)", y_test, pred_knn)
+plot_confusion(y_test, pred_knn, "KNN")
