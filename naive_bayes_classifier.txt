@@ -1,0 +1,23 @@
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+#sample data
+x=["I love programming", "python is amazing", "I hate bugs", "Debugging is fun", "I enjoy coding"]
+y=["positive","positive","negative","positive","positive"]
+
+#convert text to feature vectors
+vectorizer=CountVectorizer()
+x_transformed=vectorizer.fit_transform(x)
+
+#train-test split
+x_train,x_test,y_train,y_test=train_test_split(x_transformed,y,test_size=0.2,random_state=42)
+
+#train the Naive Bayes Model
+model=MultinomialNB()
+model.fit(x_train,y_train)
+
+#Predict
+test_sentence=["I hate bugs"]
+test_vector=vectorizer.transform(test_sentence)
+prediction= model.predict(test_vector)
+print(f"Prediction:{prediction[0]}")

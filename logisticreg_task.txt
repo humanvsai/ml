@@ -1,0 +1,46 @@
+import numpy as np
+
+# Logistic regression equation parameters
+
+intercept = -64
+
+coefficient = 2
+
+# Function to calculate probability of passing
+
+def probability_of_passing(hours):
+
+    log_odds = intercept + coefficient * hours  # log(odds) = -64 + 2 * hours
+
+    odds = np.exp(log_odds)  # Convert log-odds to odds
+
+    probability = odds / (1 + odds)  # Convert odds to probability
+
+    return probability
+
+
+# (i) Probability for a student who studied 33 hours
+
+hours_studied = 33
+
+prob_33 = probability_of_passing(hours_studied)
+
+print(f"Probability of passing for {hours_studied} hours: {prob_33:.4f}")
+
+
+
+# (ii) Finding the minimum hours needed for P > 0.95
+
+required_prob = 0.95
+
+
+
+# Solve for hours: log(odds) = ln(prob / (1 - prob))
+
+min_hours = (np.log(required_prob / (1 - required_prob)) - intercept) / coefficient
+
+min_hours = np.ceil(min_hours)  # Round up to the nearest whole number
+
+
+
+print(f"Minimum study hours required for >95% probability of passing: {int(min_hours)} hours")

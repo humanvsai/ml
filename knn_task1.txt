@@ -1,0 +1,75 @@
+import numpy as np
+
+import pandas as pd
+
+from sklearn.neighbors import KNeighborsClassifier
+
+from sklearn.preprocessing import LabelEncoder
+data = {
+
+    'Weight': [51, 62, 69, 64, 65, 56, 58, 57, 55],
+
+    'Height': [167, 182, 176, 173, 172, 174, 169, 173, 170],
+
+    'Class': ['Underweight', 'Normal', 'Normal', 'Normal', 'Normal', 'Underweight', 'Normal', 'Normal', 'Normal']
+
+}
+df = pd.DataFrame(data)
+
+# Encode class labels
+
+le = LabelEncoder()
+
+df['Class'] = le.fit_transform(df['Class'])  # Underweight = 1, Normal = 0
+
+# Feature & target
+
+X = df[['Weight', 'Height']]
+
+y = df['Class']
+
+# New data point to classify
+
+new_point = np.array([[57, 170]])
+
+
+
+# Function to train KNN with different distance metrics
+
+def classify_with_knn(k, metric):
+
+    model = KNeighborsClassifier(n_neighbors=k, metric=metric)
+
+    model.fit(X, y)
+
+    prediction = model.predict(new_point)
+
+    return le.inverse_transform(prediction)[0]
+
+
+
+# Test with different distance metrics
+
+k_value = 3  # Choosing K = 3
+
+results = {
+
+    'Metric': ['Euclidean', 'Manhattan', 'Minkowski'],
+
+    'Predicted Class': [
+
+        classify_with_knn(k_value, 'euclidean'),
+
+        classify_with_knn(k_value, 'manhattan'),
+
+        classify_with_knn(k_value, 'minkowski')
+
+    ]
+
+}
+
+# Convert results to DataFrame and display
+
+results_df = pd.DataFrame(results)
+
+print(results_df)
